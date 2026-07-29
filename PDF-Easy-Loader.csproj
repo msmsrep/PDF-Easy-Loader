@@ -19,10 +19,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Outlook COMアドイン時代の実装。参照用に残すのでビルド対象から外す -->
-    <Compile Remove="Reference\**" />
-    <None Include="Reference\**" />
-
     <!-- MSIX関連のファイルはビルド出力へ入れず、パッケージ作成時に参照する（生成物の MSIX\Package\ は除く） -->
     <None Include="MSIX\**" Exclude="MSIX\Package\**" />
   </ItemGroup>
