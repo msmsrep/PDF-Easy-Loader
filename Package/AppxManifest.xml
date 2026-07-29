@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Package
+  xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
+  xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
+  xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
+  IgnorableNamespaces="uap rescap">
+
+  <!-- Publisher は署名に使う証明書のサブジェクトと完全に一致させること -->
+  <Identity
+    Name="PDF-Easy-Loader"
+    Publisher="CN=PDF-Easy-Loader Dev"
+    Version="1.0.0.0"
+    ProcessorArchitecture="x64" />
+
+  <Properties>
+    <DisplayName>PDF Easy Loader</DisplayName>
+    <PublisherDisplayName>PDF Easy Loader</PublisherDisplayName>
+    <Logo>Assets\StoreLogo.png</Logo>
+  </Properties>
+
+  <Dependencies>
+    <TargetDeviceFamily Name="Windows.Desktop" MinVersion="10.0.17763.0" MaxVersionTested="10.0.26100.0" />
+  </Dependencies>
+
+  <Resources>
+    <Resource Language="ja-JP" />
+  </Resources>
+
+  <Applications>
+    <Application Id="App"
+                 Executable="PDF-Easy-Loader.exe"
+                 EntryPoint="Windows.FullTrustApplication">
+      <uap:VisualElements
+        DisplayName="PDF Easy Loader"
+        Description="暗号化PDFのパスワードを解除して開き、宛先と本文をクリップボードへコピーします。"
+        BackgroundColor="transparent"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png">
+        <uap:DefaultTile Square71x71Logo="Assets\Square71x71Logo.png" />
+      </uap:VisualElements>
+
+      <!--
+        .pdf の関連付けは意図的に登録していない。
+        登録すると本アプリが既定のPDFビューアに選ばれる可能性があり、
+        復号後に ShellExecute で開いた瞬間に自分自身が再起動して無限ループになるため。
+        ファイルはウィンドウへのドラッグ＆ドロップ、または起動引数で受け取る。
+      -->
+    </Application>
+  </Applications>
+
+  <Capabilities>
+    <!-- デスクトップアプリ（フル トラスト）として動かすために必須 -->
+    <rescap:Capability Name="runFullTrust" />
+  </Capabilities>
+</Package>

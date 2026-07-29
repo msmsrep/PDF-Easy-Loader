@@ -1,0 +1,157 @@
+<Window x:Class="PDF_Easy_Loader.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:b="clr-namespace:PDF_Easy_Loader.Behaviors"
+        xmlns:conv="clr-namespace:PDF_Easy_Loader.Converters"
+        xmlns:vm="clr-namespace:PDF_Easy_Loader.ViewModels"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+        Title="PDF Easy Loader" Height="620" Width="820"
+        WindowStartupLocation="CenterScreen"
+        Background="#FFF7F7F9">
+
+    <Window.Resources>
+        <conv:EmptyStringToVisibilityConverter x:Key="EmptyToVisibility" />
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
+
+        <!-- メールの1項目（見出し＋値＋コピー ボタン）を共通化する -->
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="Width" Value="52" />
+            <Setter Property="Foreground" Value="#FF6B6B76" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Margin" Value="0,2,8,0" />
+        </Style>
+
+        <Style x:Key="CopyButton" TargetType="Button">
+            <Setter Property="Padding" Value="10,2" />
+            <Setter Property="Margin" Value="8,0,0,0" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="FontSize" Value="11" />
+        </Style>
+    </Window.Resources>
+
+    <Grid b:FileDropBehavior.Command="{Binding LoadFilesCommand}" Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- ヘッダー -->
+        <DockPanel Grid.Row="0" Margin="16,12,16,0">
+            <TextBlock Text="PDF Easy Loader" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                <Button Content="履歴をクリア" Padding="12,4" Margin="0,0,8,0"
+                        Command="{Binding ClearResultsCommand}" />
+                <Button Content="パスワード設定" Padding="12,4"
+                        Command="{Binding OpenSettingsCommand}" />
+            </StackPanel>
+        </DockPanel>
+
+        <!-- ドロップ領域 -->
+        <Border Grid.Row="1" Margin="16,12,16,0" Height="120"
+                BorderBrush="#FFB9B9C6" BorderThickness="2" CornerRadius="8"
+                Background="#FFFFFFFF" SnapsToDevicePixels="True">
+            <Border.Style>
+                <Style TargetType="Border">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                            <Setter Property="Background" Value="#FFEFF3FF" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
+            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+                <TextBlock Text="PDF をここにドラッグ＆ドロップ" FontSize="16" HorizontalAlignment="Center" />
+                <TextBlock Text="パスワードを解除して開き、宛先と本文をクリップボードにコピーします"
+                           FontSize="12" Foreground="#FF6B6B76" Margin="0,6,0,0" HorizontalAlignment="Center" />
+            </StackPanel>
+        </Border>
+
+        <!-- ステータス -->
+        <TextBlock Grid.Row="2" Margin="18,10,16,0" FontSize="12" Foreground="#FF44444F"
+                   Text="{Binding StatusMessage}" />
+
+        <!-- 処理結果 -->
+        <ScrollViewer Grid.Row="3" Margin="16,8,16,16" VerticalScrollBarVisibility="Auto"
+                      Visibility="{Binding HasResults, Converter={StaticResource BoolToVisibility}}">
+            <ItemsControl ItemsSource="{Binding Results}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type vm:PdfResultViewModel}">
+                        <Border BorderBrush="#FFDDDDE5" BorderThickness="1" CornerRadius="6"
+                                Background="White" Padding="12" Margin="0,0,0,10">
+                            <StackPanel>
+                                <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding StatusText}" FontSize="11" Margin="0,2,0,0">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="#FFB00020" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding IsSuccess}" Value="True">
+                                                    <Setter Property="Foreground" Value="#FF2E7D32" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+
+                                <StackPanel Margin="0,10,0,0"
+                                            Visibility="{Binding HasMail, Converter={StaticResource BoolToVisibility}}">
+
+                                    <!-- Subject -->
+                                    <DockPanel Margin="0,0,0,6"
+                                               Visibility="{Binding Mail.Subject, Converter={StaticResource EmptyToVisibility}}">
+                                        <TextBlock Text="Subject" Style="{StaticResource FieldLabel}" />
+                                        <Button DockPanel.Dock="Right" Content="コピー" Style="{StaticResource CopyButton}"
+                                                Command="{Binding CopyCommand}" CommandParameter="{Binding Mail.Subject}" />
+                                        <TextBlock Text="{Binding Mail.Subject}" TextWrapping="Wrap" />
+                                    </DockPanel>
+
+                                    <!-- From -->
+                                    <DockPanel Margin="0,0,0,6"
+                                               Visibility="{Binding Mail.From, Converter={StaticResource EmptyToVisibility}}">
+                                        <TextBlock Text="From" Style="{StaticResource FieldLabel}" />
+                                        <Button DockPanel.Dock="Right" Content="コピー" Style="{StaticResource CopyButton}"
+                                                Command="{Binding CopyCommand}" CommandParameter="{Binding Mail.From}" />
+                                        <TextBlock Text="{Binding Mail.From}" TextWrapping="Wrap" />
+                                    </DockPanel>
+
+                                    <!-- To -->
+                                    <DockPanel Margin="0,0,0,6"
+                                               Visibility="{Binding Mail.To, Converter={StaticResource EmptyToVisibility}}">
+                                        <TextBlock Text="To" Style="{StaticResource FieldLabel}" />
+                                        <Button DockPanel.Dock="Right" Content="コピー" Style="{StaticResource CopyButton}"
+                                                Command="{Binding CopyCommand}" CommandParameter="{Binding Mail.To}" />
+                                        <TextBlock Text="{Binding Mail.To}" TextWrapping="Wrap" />
+                                    </DockPanel>
+
+                                    <!-- Cc -->
+                                    <DockPanel Margin="0,0,0,6"
+                                               Visibility="{Binding Mail.Cc, Converter={StaticResource EmptyToVisibility}}">
+                                        <TextBlock Text="Cc" Style="{StaticResource FieldLabel}" />
+                                        <Button DockPanel.Dock="Right" Content="コピー" Style="{StaticResource CopyButton}"
+                                                Command="{Binding CopyCommand}" CommandParameter="{Binding Mail.Cc}" />
+                                        <TextBlock Text="{Binding Mail.Cc}" TextWrapping="Wrap" />
+                                    </DockPanel>
+
+                                    <!-- 本文 -->
+                                    <DockPanel Visibility="{Binding Mail.Body, Converter={StaticResource EmptyToVisibility}}">
+                                        <TextBlock Text="本文" Style="{StaticResource FieldLabel}" />
+                                        <Button DockPanel.Dock="Right" Content="コピー" Style="{StaticResource CopyButton}"
+                                                Command="{Binding CopyCommand}" CommandParameter="{Binding Mail.Body}" />
+                                        <ScrollViewer MaxHeight="160" VerticalScrollBarVisibility="Auto">
+                                            <TextBlock Text="{Binding Mail.Body}" TextWrapping="Wrap" Foreground="#FF33333C" />
+                                        </ScrollViewer>
+                                    </DockPanel>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+    </Grid>
+</Window>

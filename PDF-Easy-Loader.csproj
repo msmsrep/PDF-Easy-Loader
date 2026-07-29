@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
+    <!-- TFMのWindowsバージョンがそのまま最低OS要件にならないよう、AppxManifestのMinVersionに合わせる -->
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <RootNamespace>PDF_Easy_Loader</RootNamespace>
+    <AssemblyName>PDF-Easy-Loader</AssemblyName>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <!-- ターゲットランタイム -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <!-- MSIXなのでランタイムを含めない -->
+    <SelfContained>false</SelfContained>
+    <!-- アプリのアイコンをMSIXにも設定 -->
+    <!-- <ApplicationIcon>Assets/logo.ico</ApplicationIcon> -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Outlook COMアドイン時代の実装。参照用に残すのでビルド対象から外す -->
+    <Compile Remove="Reference\**" />
+    <None Include="Reference\**" />
+
+    <!-- MSIX関連のファイルはビルド出力へ入れず、パッケージ作成スクリプトから参照する -->
+    <None Include="Package\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="itext" Version="9.7.0" />
+    <PackageReference Include="itext.bouncy-castle-adapter" Version="9.7.0" />
+    <PackageReference Include="itext.font-asian" Version="9.7.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
+    <!-- DPAPI (ProtectedData) は .NET 10 の Windows 向けランタイムに同梱されているため参照不要 -->
+  </ItemGroup>
+
+</Project>
