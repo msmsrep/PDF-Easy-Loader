@@ -3,3 +3,8 @@ bin/
 .claude/
 Reference/
 sample/
+
+# Development certificate
+devcert.pfx
+
+MSIX/Package/

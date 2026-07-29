@@ -23,8 +23,8 @@
     <Compile Remove="Reference\**" />
     <None Include="Reference\**" />
 
-    <!-- MSIX関連のファイルはビルド出力へ入れず、パッケージ作成スクリプトから参照する -->
-    <None Include="Package\**" />
+    <!-- MSIX関連のファイルはビルド出力へ入れず、パッケージ作成時に参照する（生成物の MSIX\Package\ は除く） -->
+    <None Include="MSIX\**" Exclude="MSIX\Package\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,5 +35,48 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
     <!-- DPAPI (ProtectedData) は .NET 10 の Windows 向けランタイムに同梱されているため参照不要 -->
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\**\*" />
+  </ItemGroup>
+
+  <!-- Automatically package as MSIX after dotnet publish -->
+  <Target Name="PackageMsix" AfterTargets="Publish">
+    <PropertyGroup>
+      <!-- 未指定ならPATH上の winapp を使う -->
+      <WinAppCliPath Condition="'$(WinAppCliPath)' == ''">winapp</WinAppCliPath>
+      <!-- マニフェストと署名証明書は MSIX\、生成した .msix は MSIX\Package\ に置く -->
+      <MsixManifestPath>$(ProjectDir)MSIX\Package.appxmanifest</MsixManifestPath>
+      <MsixCertPath>$(ProjectDir)MSIX\devcert.pfx</MsixCertPath>
+      <MsixOutputDir>$(ProjectDir)MSIX\Package</MsixOutputDir>
+    </PropertyGroup>
+
+    <!-- 出力ファイル名（<name>_<version>_<arch>.msix）を組み立てるためマニフェストから Identity を読む -->
+    <XmlPeek XmlInputPath="$(MsixManifestPath)"
+             Namespaces="&lt;Namespace Prefix='m' Uri='http://schemas.microsoft.com/appx/manifest/foundation/windows10' /&gt;"
+             Query="/m:Package/m:Identity/@Name">
+      <Output TaskParameter="Result" PropertyName="_MsixName" />
+    </XmlPeek>
+    <XmlPeek XmlInputPath="$(MsixManifestPath)"
+             Namespaces="&lt;Namespace Prefix='m' Uri='http://schemas.microsoft.com/appx/manifest/foundation/windows10' /&gt;"
+             Query="/m:Package/m:Identity/@Version">
+      <Output TaskParameter="Result" PropertyName="_MsixVersion" />
+    </XmlPeek>
+
+    <MakeDir Directories="$(MsixOutputDir)" />
+
+    <PropertyGroup>
+      <_MsixArch>$(RuntimeIdentifier.Substring($([MSBuild]::Add($(RuntimeIdentifier.LastIndexOf('-')), 1))))</_MsixArch>
+      <_MsixOutputFile>$(MsixOutputDir)\$(_MsixName)_$(_MsixVersion)_$(_MsixArch).msix</_MsixOutputFile>
+      <_WinAppPackArgs>pack &quot;$(PublishDir.TrimEnd('\'))&quot;</_WinAppPackArgs>
+      <_WinAppPackArgs>$(_WinAppPackArgs) --manifest &quot;$(MsixManifestPath)&quot;</_WinAppPackArgs>
+      <_WinAppPackArgs>$(_WinAppPackArgs) --output &quot;$(_MsixOutputFile)&quot;</_WinAppPackArgs>
+      <_WinAppPackArgs Condition="Exists('$(MsixCertPath)')">$(_WinAppPackArgs) --cert &quot;$(MsixCertPath)&quot;</_WinAppPackArgs>
+    </PropertyGroup>
+
+    <Exec Command="&quot;$(WinAppCliPath)&quot; $(_WinAppPackArgs)"
+          WorkingDirectory="$(ProjectDir)"
+          IgnoreExitCode="false" />
+  </Target>
 
 </Project>
