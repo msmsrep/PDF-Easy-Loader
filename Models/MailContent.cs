@@ -3,7 +3,7 @@ namespace PDF_Easy_Loader.Models;
 /// <summary>
 /// PDF1ページ目から抽出したメールの内容
 /// </summary>
-public sealed class MailContent
+public sealed record MailContent
 {
     public string From { get; init; } = string.Empty;
 

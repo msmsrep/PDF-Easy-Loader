@@ -2,8 +2,6 @@ using System.IO;
 using System.Text;
 using iText.Kernel.Exceptions;
 using iText.Kernel.Pdf;
-using iText.Kernel.Pdf.Canvas.Parser;
-using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using PDF_Easy_Loader.Models;
 
 namespace PDF_Easy_Loader.Services;
@@ -81,11 +79,14 @@ public sealed class PdfService : IPdfService
 
             if (doc.GetNumberOfPages() == 0) return MailContent.Empty;
 
-            // 1ページ目からテキストを丸ごと抽出する
-            var strategy = new LocationTextExtractionStrategy();
-            string pageText = PdfTextExtractor.GetTextFromPage(doc.GetPage(1), strategy);
+            // 1ページ目を座標付きで読む。ヘッダーの列位置と mailto: リンクの位置が要る
+            var layout = PdfPageLayout.Read(doc.GetPage(1));
+            var mail = MailHeaderParser.Parse(layout);
 
-            return MailHeaderParser.Parse(pageText);
+            // 元のメール本文が添付されていれば、ページの描画テキストより優先する
+            string? embeddedBody = PdfEmbeddedBody.Read(doc);
+
+            return embeddedBody is null ? mail : mail with { Body = embeddedBody };
         }
         catch (Exception)
         {
