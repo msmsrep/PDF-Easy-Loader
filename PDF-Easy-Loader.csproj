@@ -12,8 +12,10 @@
     <UseWPF>true</UseWPF>
     <!-- ターゲットランタイム -->
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <!-- MSIXなのでランタイムを含めない -->
-    <SelfContained>false</SelfContained>
+    <!-- 自己完結型にする -->
+    <SelfContained>true</SelfContained>
+    <!-- 多言語のファイルを減らす -->
+    <SatelliteResourceLanguages>en;ja</SatelliteResourceLanguages>
     <!-- アプリのアイコンをMSIXにも設定 -->
     <!-- <ApplicationIcon>Assets/logo.ico</ApplicationIcon> -->
   </PropertyGroup>
