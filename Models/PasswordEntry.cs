@@ -5,7 +5,7 @@ namespace PDF_Easy_Loader.Models;
 /// </summary>
 public sealed class PasswordEntry
 {
-    /// <summary>取引先名など、利用者が識別するためのラベル</summary>
+    /// <summary>利用者が識別するためのラベル</summary>
     public string Label { get; set; } = string.Empty;
 
     /// <summary>PDFのユーザーパスワード（保存時はDPAPIで暗号化される）</summary>

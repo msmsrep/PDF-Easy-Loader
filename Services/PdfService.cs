@@ -7,7 +7,7 @@ using PDF_Easy_Loader.Models;
 namespace PDF_Easy_Loader.Services;
 
 /// <summary>
-/// iText版のPDF操作。Outlookアドインの PdfHelper から移植したもの。
+/// iText版のPDF操作
 /// </summary>
 public sealed class PdfService : IPdfService
 {
