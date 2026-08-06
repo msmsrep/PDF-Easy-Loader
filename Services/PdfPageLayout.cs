@@ -20,7 +20,7 @@ public sealed record PageTextLine(float Baseline, float Left, string Text);
 public sealed record MailtoLink(string Address, float Baseline, float Left);
 
 /// <summary>
-/// PDF1ページ分のテキストを座標付きで読み出したもの。
+/// PDFのテキストを座標付きで読み出したもの（1ページ分、または全ページを縦に積んだもの）。
 /// メールヘッダーは「ラベル列」と「値列」に分かれた表組みで描かれるため、
 /// 座標が分かるとフィールドの範囲を文字列の当て推量なしに決められる。
 /// </summary>
@@ -60,6 +60,56 @@ public sealed class PdfPageLayout
         {
             Lines = lines,
             MailtoLinks = ReadMailtoLinks(page),
+            LinePitch = MedianPitch(lines),
+        };
+    }
+
+    /// <summary>
+    /// 全ページを読み、縦に積んだ1つのレイアウトとして返す。
+    /// 本文が複数ページに渡るPDFで、2ページ目以降を取りこぼさないために使う。
+    /// </summary>
+    public static PdfPageLayout ReadAll(PdfDocument document)
+    {
+        int pageCount = document.GetNumberOfPages();
+
+        if (pageCount == 0) return Empty;
+        if (pageCount == 1) return Read(document.GetPage(1));
+
+        var lines = new List<PageTextLine>();
+        var links = new List<MailtoLink>();
+
+        // ページごとにY座標は独立している（どのページも下端が0）ため、
+        // 後続ページを前ページの続きの位置へずらして1続きの座標系にする
+        float offset = 0f;
+
+        for (int i = 1; i <= pageCount; i++)
+        {
+            var page = Read(document.GetPage(i));
+
+            if (page.Lines.Count == 0) continue;
+
+            if (lines.Count > 0)
+            {
+                // 前ページの最終行のちょうど1行下から始める。
+                // ページの変わり目を段落の切れ目と誤認させないため、余分な間隔は空けない
+                offset = lines[^1].Baseline - page.LinePitch - page.Lines[0].Baseline;
+            }
+
+            foreach (var line in page.Lines)
+            {
+                lines.Add(line with { Baseline = line.Baseline + offset });
+            }
+
+            foreach (var link in page.MailtoLinks)
+            {
+                links.Add(link with { Baseline = link.Baseline + offset });
+            }
+        }
+
+        return new PdfPageLayout
+        {
+            Lines = lines,
+            MailtoLinks = links,
             LinePitch = MedianPitch(lines),
         };
     }

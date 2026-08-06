@@ -5,7 +5,7 @@ using PDF_Easy_Loader.Models;
 namespace PDF_Easy_Loader.Services;
 
 /// <summary>
-/// PDF1ページ目のレイアウトを、メールのFrom/To/Cc/Subject/本文に分解する。
+/// PDF（全ページ）のレイアウトを、メールのFrom/To/Cc/Subject/本文に分解する。
 ///
 /// ヘッダーは「ラベル列（From: など）」と「値列」に分かれた表組みとして描かれるので、
 /// 座標からフィールドの範囲を決め、アドレスはページに埋め込まれた mailto: リンク注釈から取る。

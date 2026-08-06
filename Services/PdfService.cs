@@ -77,10 +77,9 @@ public sealed class PdfService : IPdfService
             using var reader = new PdfReader(pdfPath);
             using var doc = new PdfDocument(reader);
 
-            if (doc.GetNumberOfPages() == 0) return MailContent.Empty;
-
-            // 1ページ目を座標付きで読む。ヘッダーの列位置と mailto: リンクの位置が要る
-            var layout = PdfPageLayout.Read(doc.GetPage(1));
+            // 全ページを座標付きで読む。ヘッダーの列位置と mailto: リンクの位置が要る。
+            // 本文が2ページ目以降へ続くPDFがあるため、1ページ目だけでは足りない
+            var layout = PdfPageLayout.ReadAll(doc);
             var mail = MailHeaderParser.Parse(layout);
 
             // 元のメール本文が添付されていれば、ページの描画テキストより優先する
