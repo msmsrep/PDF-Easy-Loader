@@ -11,6 +11,12 @@ public interface IDialogService
     /// </summary>
     string? AskPassword(string fileName);
 
+    /// <summary>
+    /// ファイル選択ダイアログでPDFを選ばせる。
+    /// キャンセルされた場合は空の配列。
+    /// </summary>
+    IReadOnlyList<string> PickPdfFiles();
+
     /// <summary>設定画面をモーダルで開く</summary>
     void ShowSettings();
 

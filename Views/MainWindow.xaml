@@ -68,6 +68,9 @@
                 <TextBlock Text="PDF をここにドラッグ＆ドロップ" FontSize="16" HorizontalAlignment="Center" />
                 <TextBlock Text="パスワードを解除して開き、宛先と本文をクリップボードにコピーします"
                            FontSize="12" Foreground="#FF6B6B76" Margin="0,6,0,0" HorizontalAlignment="Center" />
+                <Button Content="ファイルを選択..." Padding="16,4" Margin="0,10,0,0"
+                        HorizontalAlignment="Center"
+                        Command="{Binding BrowseFilesCommand}" />
             </StackPanel>
         </Border>
 

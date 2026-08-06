@@ -23,7 +23,7 @@ public sealed partial class MainViewModel(
     public partial bool IsBusy { get; private set; }
 
     [ObservableProperty]
-    public partial string StatusMessage { get; private set; } = "PDFをここにドラッグ＆ドロップしてください";
+    public partial string StatusMessage { get; private set; } = "PDFをドラッグ＆ドロップするか、ファイルを選択してください";
 
     public bool HasResults => Results.Count > 0;
 
@@ -33,6 +33,9 @@ public sealed partial class MainViewModel(
     [RelayCommand(AllowConcurrentExecutions = false)]
     private async Task LoadFilesAsync(IReadOnlyList<string>? paths)
     {
+        // ドロップとファイル選択が同時に走らないようにする
+        if (IsBusy) return;
+
         if (paths is null || paths.Count == 0) return;
 
         var pdfPaths = paths
@@ -75,6 +78,12 @@ public sealed partial class MainViewModel(
         }
     }
 
+    /// <summary>
+    /// ファイル選択ダイアログで選ばれたPDFを処理する
+    /// </summary>
+    [RelayCommand(AllowConcurrentExecutions = false)]
+    private Task BrowseFilesAsync() => LoadFilesAsync(dialogs.PickPdfFiles());
+
     [RelayCommand]
     private void OpenSettings() => dialogs.ShowSettings();
 
@@ -83,6 +92,6 @@ public sealed partial class MainViewModel(
     {
         Results.Clear();
         OnPropertyChanged(nameof(HasResults));
-        StatusMessage = "PDFをここにドラッグ＆ドロップしてください";
+        StatusMessage = "PDFをドラッグ＆ドロップするか、ファイルを選択してください";
     }
 }
