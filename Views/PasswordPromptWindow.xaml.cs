@@ -36,7 +36,10 @@ public partial class PasswordPromptWindow : Window
     {
         _viewModel.RequestClose -= OnRequestClose;
 
-        // 入力欄に平文を残さない
+        // 入力欄に平文を残さない。
+        // Clear() は PasswordChanged を発火させるため、先にハンドラを外さないと
+        // ViewModel の Password まで空になり、呼び出し側が入力値を受け取れなくなる
+        PasswordInput.PasswordChanged -= OnPasswordChanged;
         PasswordInput.Clear();
 
         base.OnClosed(e);
