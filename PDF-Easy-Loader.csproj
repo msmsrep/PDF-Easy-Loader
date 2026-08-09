@@ -18,6 +18,8 @@
     <SatelliteResourceLanguages>en;ja</SatelliteResourceLanguages>
     <!-- アプリのアイコンをMSIXにも設定 -->
     <ApplicationIcon>Assets/logo.ico</ApplicationIcon>
+    <!-- ライセンス表記（exeのファイルプロパティに入る） -->
+    <Copyright>Copyright (C) 2026 msmsrep - Licensed under AGPL-3.0-or-later</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
