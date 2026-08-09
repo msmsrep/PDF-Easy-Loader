@@ -17,7 +17,7 @@
     <!-- 多言語のファイルを減らす -->
     <SatelliteResourceLanguages>en;ja</SatelliteResourceLanguages>
     <!-- アプリのアイコンをMSIXにも設定 -->
-    <!-- <ApplicationIcon>Assets/logo.ico</ApplicationIcon> -->
+    <ApplicationIcon>Assets/logo.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -35,7 +35,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Assets\**\*" />
+    <!-- winapp pack は発行フォルダーをそのまま梱包するため、タイル/アイコン画像を publish の Assets\ へ出力する -->
+    <Content Include="Assets\**\*.png" CopyToOutputDirectory="PreserveNewest" />
+    <!-- 元画像(svg)と exe 埋め込み用の ico はパッケージに含めない -->
+    <None Include="Assets\icon.svg;Assets\logo.ico" />
   </ItemGroup>
 
   <!-- Automatically package as MSIX after dotnet publish -->
