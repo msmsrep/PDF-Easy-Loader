@@ -40,7 +40,7 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
-                <TextBlock Grid.Row="0" Grid.Column="0" Text="識別名（取引先名など）"
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="識別名"
                            FontSize="11" Foreground="#FF6B6B76" Margin="0,0,8,4" />
                 <TextBlock Grid.Row="0" Grid.Column="1" Text="パスワード"
                            FontSize="11" Foreground="#FF6B6B76" Margin="0,0,8,4" />

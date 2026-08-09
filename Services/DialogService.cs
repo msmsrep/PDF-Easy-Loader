@@ -1,5 +1,6 @@
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Win32;
 using PDF_Easy_Loader.ViewModels;
 using PDF_Easy_Loader.Views;
 
@@ -20,6 +21,19 @@ public sealed class DialogService(IServiceProvider services) : IDialogService
         };
 
         return window.ShowDialog() == true ? viewModel.Password : null;
+    }
+
+    public IReadOnlyList<string> PickPdfFiles()
+    {
+        var dialog = new OpenFileDialog
+        {
+            Title = "PDFファイルを選択",
+            Filter = "PDFファイル (*.pdf)|*.pdf",
+            Multiselect = true,
+            CheckFileExists = true,
+        };
+
+        return dialog.ShowDialog(ActiveOwner) == true ? dialog.FileNames : [];
     }
 
     public void ShowSettings()

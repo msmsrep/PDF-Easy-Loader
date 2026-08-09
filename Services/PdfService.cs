@@ -2,14 +2,12 @@ using System.IO;
 using System.Text;
 using iText.Kernel.Exceptions;
 using iText.Kernel.Pdf;
-using iText.Kernel.Pdf.Canvas.Parser;
-using iText.Kernel.Pdf.Canvas.Parser.Listener;
 using PDF_Easy_Loader.Models;
 
 namespace PDF_Easy_Loader.Services;
 
 /// <summary>
-/// iText版のPDF操作。Outlookアドインの PdfHelper から移植したもの。
+/// iText版のPDF操作
 /// </summary>
 public sealed class PdfService : IPdfService
 {
@@ -79,13 +77,15 @@ public sealed class PdfService : IPdfService
             using var reader = new PdfReader(pdfPath);
             using var doc = new PdfDocument(reader);
 
-            if (doc.GetNumberOfPages() == 0) return MailContent.Empty;
+            // 全ページを座標付きで読む。ヘッダーの列位置と mailto: リンクの位置が要る。
+            // 本文が2ページ目以降へ続くPDFがあるため、1ページ目だけでは足りない
+            var layout = PdfPageLayout.ReadAll(doc);
+            var mail = MailHeaderParser.Parse(layout);
 
-            // 1ページ目からテキストを丸ごと抽出する
-            var strategy = new LocationTextExtractionStrategy();
-            string pageText = PdfTextExtractor.GetTextFromPage(doc.GetPage(1), strategy);
+            // 元のメール本文が添付されていれば、ページの描画テキストより優先する
+            string? embeddedBody = PdfEmbeddedBody.Read(doc);
 
-            return MailHeaderParser.Parse(pageText);
+            return embeddedBody is null ? mail : mail with { Body = embeddedBody };
         }
         catch (Exception)
         {

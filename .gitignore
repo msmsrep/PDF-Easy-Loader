@@ -2,4 +2,9 @@ obj/
 bin/
 .claude/
 Reference/
-sample/
+# sample/
+
+# Development certificate
+devcert.pfx
+
+MSIX/Package/
