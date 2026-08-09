@@ -12,8 +12,8 @@
   IgnorableNamespaces="uap uap2 uap3 uap10 desktop desktop6 rescap">
 
   <Identity
-    Name="PDF-Easy-Loader"
-    Publisher="CN=msmsrep"
+    Name="msmsrep.PDF-Easy-Loader"
+    Publisher="CN=5E0CB4C9-E2E2-4B35-A7BB-09FE6EB44D12"
     Version="1.0.0.0" />
 
   <Properties>
