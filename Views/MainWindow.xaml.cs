@@ -6,10 +6,12 @@ namespace PDF_Easy_Loader.Views;
 
 public partial class MainWindow : Window
 {
-    /// <summary>結果が無い間の高さ。ヘッダーとステータスだけが見えれば足りる</summary>
-    private const double CompactHeight = 145;
+    /// <summary>結果が無い間の大きさ。ヘッダーの操作列が収まれば足りる</summary>
+    private const double CompactWidth = 560;
+    private const double CompactHeight = 130;
 
-    /// <summary>結果を表示するときの高さ</summary>
+    /// <summary>結果を表示するときの大きさ</summary>
+    private const double ExpandedWidth = 820;
     private const double ExpandedHeight = 620;
 
     private readonly MainViewModel _viewModel;
@@ -22,6 +24,8 @@ public partial class MainWindow : Window
         DataContext = viewModel;
 
         viewModel.PropertyChanged += OnViewModelPropertyChanged;
+
+        Width = viewModel.HasResults ? ExpandedWidth : CompactWidth;
         Height = viewModel.HasResults ? ExpandedHeight : CompactHeight;
     }
 
@@ -29,21 +33,35 @@ public partial class MainWindow : Window
     {
         if (e.PropertyName != nameof(MainViewModel.HasResults)) return;
 
-        ApplyHeight(_viewModel.HasResults ? ExpandedHeight : CompactHeight);
+        if (_viewModel.HasResults)
+        {
+            ApplySize(ExpandedWidth, ExpandedHeight);
+        }
+        else
+        {
+            ApplySize(CompactWidth, CompactHeight);
+        }
     }
 
     /// <summary>
-    /// 結果の有無に合わせて高さを伸縮する。
+    /// 結果の有無に合わせて大きさを伸縮する。
     /// 画面外へはみ出しにくいよう、ウィンドウの中心は動かさない。
     /// </summary>
-    private void ApplyHeight(double height)
+    private void ApplySize(double width, double height)
     {
         // 最大化中はユーザーの状態を尊重する
         if (WindowState != WindowState.Normal) return;
 
-        if (Math.Abs(Height - height) < 0.5) return;
+        if (Math.Abs(Width - width) >= 0.5)
+        {
+            Left -= (width - Width) / 2;
+            Width = width;
+        }
 
-        Top -= (height - Height) / 2;
-        Height = height;
+        if (Math.Abs(Height - height) >= 0.5)
+        {
+            Top -= (height - Height) / 2;
+            Height = height;
+        }
     }
 }

@@ -8,8 +8,8 @@
         xmlns:vm="clr-namespace:PDF_Easy_Loader.ViewModels"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
-        Title="PDF Easy Loader" Width="820"
-        MinWidth="760" MinHeight="130"
+        Title="PDF Easy Loader"
+        MinWidth="540" MinHeight="120"
         WindowStartupLocation="CenterScreen"
         Topmost="{Binding IsAlwaysOnTop}"
         Background="#FFF7F7F9">
@@ -43,7 +43,6 @@
 
         <!-- ヘッダー -->
         <DockPanel Grid.Row="0" Margin="16,12,16,0">
-            <TextBlock Text="PDF Easy Loader" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
                 <!-- ドロップ先はウィンドウ全体。この枠は目印とファイル選択を兼ねる -->
                 <Border BorderBrush="#FFB9B9C6" BorderThickness="1" CornerRadius="6"
