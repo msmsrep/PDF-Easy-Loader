@@ -10,6 +10,7 @@
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         Title="PDF Easy Loader" Height="620" Width="820"
         WindowStartupLocation="CenterScreen"
+        Topmost="{Binding IsAlwaysOnTop}"
         Background="#FFF7F7F9">
 
     <Window.Resources>
@@ -44,6 +45,23 @@
         <DockPanel Grid.Row="0" Margin="16,12,16,0">
             <TextBlock Text="PDF Easy Loader" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                <!-- ドラッグ＆ドロップ中に他のウィンドウへ隠れないようにする -->
+                <ToggleButton IsChecked="{Binding IsAlwaysOnTop}" Margin="0,0,8,0"
+                              ToolTip="ウィンドウを常に手前へ表示します（設定は次回起動時も引き継がれます）">
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton">
+                            <Setter Property="Padding" Value="12,4" />
+                            <Setter Property="Content" Value="最前面: OFF" />
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Content" Value="最前面: ON" />
+                                    <Setter Property="FontWeight" Value="SemiBold" />
+                                    <Setter Property="Background" Value="#FFD6E4FF" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
                 <Button Content="履歴をクリア" Padding="12,4" Margin="0,0,8,0"
                         Command="{Binding ClearResultsCommand}" />
                 <Button Content="パスワード設定" Padding="12,4"

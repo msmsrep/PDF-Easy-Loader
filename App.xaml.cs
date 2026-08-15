@@ -50,6 +50,7 @@ public partial class App : Application
 
         services.AddSingleton<IPdfService, PdfService>();
         services.AddSingleton<IPasswordStore, DpapiPasswordStore>();
+        services.AddSingleton<IAppSettingsStore, JsonAppSettingsStore>();
         services.AddSingleton<ITempWorkspace, TempWorkspace>();
         services.AddSingleton<IClipboardService, ClipboardService>();
         services.AddSingleton<IDialogService, DialogService>();
