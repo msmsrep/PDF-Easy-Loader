@@ -12,7 +12,8 @@ namespace PDF_Easy_Loader.ViewModels;
 public sealed partial class MainViewModel(
     IPdfLoader loader,
     IClipboardService clipboard,
-    IDialogService dialogs) : ObservableObject
+    IDialogService dialogs,
+    IAppSettingsStore settingsStore) : ObservableObject
 {
     private const string PdfExtension = ".pdf";
 
@@ -26,6 +27,21 @@ public sealed partial class MainViewModel(
     public partial string StatusMessage { get; private set; } = "PDFをドラッグ＆ドロップするか、ファイルを選択してください";
 
     public bool HasResults => Results.Count > 0;
+
+    /// <summary>
+    /// ウィンドウを常に手前へ表示するか。
+    /// 他アプリからドラッグ＆ドロップする間に隠れないよう、切り替え内容は次回起動へ引き継ぐ。
+    /// </summary>
+    [ObservableProperty]
+    public partial bool IsAlwaysOnTop { get; set; } = settingsStore.Load().AlwaysOnTop;
+
+    partial void OnIsAlwaysOnTopChanged(bool value)
+    {
+        // 他の設定項目を消さないよう、保存済みの内容へ上書きしてから書き戻す
+        var settings = settingsStore.Load();
+        settings.AlwaysOnTop = value;
+        settingsStore.Save(settings);
+    }
 
     /// <summary>
     /// ドロップされたファイル、または起動引数で渡されたファイルを処理する

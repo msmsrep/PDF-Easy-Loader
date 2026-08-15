@@ -8,8 +8,10 @@
         xmlns:vm="clr-namespace:PDF_Easy_Loader.ViewModels"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
-        Title="PDF Easy Loader" Height="620" Width="820"
+        Title="PDF Easy Loader"
+        MinWidth="540" MinHeight="120"
         WindowStartupLocation="CenterScreen"
+        Topmost="{Binding IsAlwaysOnTop}"
         Background="#FFF7F7F9">
 
     <Window.Resources>
@@ -36,14 +38,52 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <!-- ヘッダー -->
         <DockPanel Grid.Row="0" Margin="16,12,16,0">
-            <TextBlock Text="PDF Easy Loader" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Right">
+                <!-- ドロップ先はウィンドウ全体。この枠は目印とファイル選択を兼ねる -->
+                <Border BorderBrush="#FFB9B9C6" BorderThickness="1" CornerRadius="6"
+                        Padding="10,3" Margin="0,0,8,0" VerticalAlignment="Center"
+                        SnapsToDevicePixels="True"
+                        ToolTip="パスワードを解除して開き、宛先と本文をクリップボードにコピーします">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Background" Value="#FFFFFFFF" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                    <Setter Property="Background" Value="#FFEFF3FF" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="PDF をここにドロップ" FontSize="12" VerticalAlignment="Center"
+                                   Foreground="#FF44444F" />
+                        <Button Content="ファイルを選択..." Padding="10,2" Margin="8,0,0,0" FontSize="11"
+                                Command="{Binding BrowseFilesCommand}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- ドラッグ＆ドロップ中に他のウィンドウへ隠れないようにする -->
+                <ToggleButton IsChecked="{Binding IsAlwaysOnTop}" Margin="0,0,8,0"
+                              ToolTip="ウィンドウを常に手前へ表示します（設定は次回起動時も引き継がれます）">
+                    <ToggleButton.Style>
+                        <Style TargetType="ToggleButton">
+                            <Setter Property="Padding" Value="12,4" />
+                            <Setter Property="Content" Value="最前面: OFF" />
+                            <Style.Triggers>
+                                <Trigger Property="IsChecked" Value="True">
+                                    <Setter Property="Content" Value="最前面: ON" />
+                                    <Setter Property="FontWeight" Value="SemiBold" />
+                                    <Setter Property="Background" Value="#FFD6E4FF" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ToggleButton.Style>
+                </ToggleButton>
                 <Button Content="履歴をクリア" Padding="12,4" Margin="0,0,8,0"
                         Command="{Binding ClearResultsCommand}" />
                 <Button Content="パスワード設定" Padding="12,4"
@@ -51,41 +91,34 @@
             </StackPanel>
         </DockPanel>
 
-        <!-- ドロップ領域 -->
-        <Border Grid.Row="1" Margin="16,12,16,0" Height="120"
-                BorderBrush="#FFB9B9C6" BorderThickness="2" CornerRadius="8"
-                Background="#FFFFFFFF" SnapsToDevicePixels="True">
-            <Border.Style>
-                <Style TargetType="Border">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsBusy}" Value="True">
-                            <Setter Property="Background" Value="#FFEFF3FF" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </Border.Style>
-            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                <TextBlock Text="PDF をここにドラッグ＆ドロップ" FontSize="16" HorizontalAlignment="Center" />
-                <TextBlock Text="パスワードを解除して開き、宛先と本文をクリップボードにコピーします"
-                           FontSize="12" Foreground="#FF6B6B76" Margin="0,6,0,0" HorizontalAlignment="Center" />
-                <Button Content="ファイルを選択..." Padding="16,4" Margin="0,10,0,0"
-                        HorizontalAlignment="Center"
-                        Command="{Binding BrowseFilesCommand}" />
-            </StackPanel>
-        </Border>
-
         <!-- ステータス -->
-        <TextBlock Grid.Row="2" Margin="18,10,16,0" FontSize="12" Foreground="#FF44444F"
+        <TextBlock Grid.Row="1" Margin="18,10,16,0" FontSize="12" Foreground="#FF44444F"
                    Text="{Binding StatusMessage}" />
 
         <!-- 処理結果 -->
-        <ScrollViewer Grid.Row="3" Margin="16,8,16,16" VerticalScrollBarVisibility="Auto"
+        <ScrollViewer Grid.Row="2" Margin="16,8,16,16" VerticalScrollBarVisibility="Auto"
                       Visibility="{Binding HasResults, Converter={StaticResource BoolToVisibility}}">
             <ItemsControl ItemsSource="{Binding Results}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type vm:PdfResultViewModel}">
                         <Border BorderBrush="#FFDDDDE5" BorderThickness="1" CornerRadius="6"
-                                Background="White" Padding="12" Margin="0,0,0,10">
+                                Background="White" Padding="12">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Margin" Value="0,0,0,10" />
+                                    <Style.Triggers>
+                                        <!-- 1件だけのときは表示領域いっぱいに広げ、下の余白をなくす -->
+                                        <DataTrigger Value="1"
+                                                     Binding="{Binding DataContext.Results.Count,
+                                                                       RelativeSource={RelativeSource AncestorType=ItemsControl}}">
+                                            <Setter Property="Margin" Value="0" />
+                                            <Setter Property="MinHeight"
+                                                    Value="{Binding ViewportHeight,
+                                                                    RelativeSource={RelativeSource AncestorType=ScrollViewer}}" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
                             <StackPanel>
                                 <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                                 <TextBlock Text="{Binding StatusText}" FontSize="11" Margin="0,2,0,0">
@@ -145,9 +178,8 @@
                                         <TextBlock Text="本文" Style="{StaticResource FieldLabel}" />
                                         <Button DockPanel.Dock="Right" Content="コピー" Style="{StaticResource CopyButton}"
                                                 Command="{Binding CopyCommand}" CommandParameter="{Binding Mail.Body}" />
-                                        <ScrollViewer MaxHeight="160" VerticalScrollBarVisibility="Auto">
-                                            <TextBlock Text="{Binding Mail.Body}" TextWrapping="Wrap" Foreground="#FF33333C" />
-                                        </ScrollViewer>
+                                        <!-- 本文は高さを制限せず、はみ出す分は一覧側のスクロールに任せる -->
+                                        <TextBlock Text="{Binding Mail.Body}" TextWrapping="Wrap" Foreground="#FF33333C" />
                                     </DockPanel>
                                 </StackPanel>
                             </StackPanel>
