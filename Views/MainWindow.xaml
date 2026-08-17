@@ -9,10 +9,15 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
         Title="PDF Easy Loader"
-        MinWidth="540" MinHeight="120"
+        MinWidth="620" MinHeight="120"
         WindowStartupLocation="CenterScreen"
         Topmost="{Binding IsAlwaysOnTop}"
         Background="#FFF7F7F9">
+
+    <Window.InputBindings>
+        <!-- Outlookでコピーした添付をそのまま貼り付けられるようにする -->
+        <KeyBinding Key="V" Modifiers="Control" Command="{Binding PasteCommand}" />
+    </Window.InputBindings>
 
     <Window.Resources>
         <conv:EmptyStringToVisibilityConverter x:Key="EmptyToVisibility" />
@@ -34,7 +39,7 @@
         </Style>
     </Window.Resources>
 
-    <Grid b:FileDropBehavior.Command="{Binding LoadFilesCommand}" Background="Transparent">
+    <Grid b:FileDropBehavior.Command="{Binding DropCommand}" Background="Transparent">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -64,6 +69,10 @@
                                    Foreground="#FF44444F" />
                         <Button Content="ファイルを選択..." Padding="10,2" Margin="8,0,0,0" FontSize="11"
                                 Command="{Binding BrowseFilesCommand}" />
+                        <!-- Outlookからドラッグできない場合の受け口。添付をコピーしてから押す -->
+                        <Button Content="貼り付け" Padding="10,2" Margin="6,0,0,0" FontSize="11"
+                                Command="{Binding PasteCommand}"
+                                ToolTip="Outlookでコピーした添付ファイルを貼り付けます（Ctrl+V）" />
                     </StackPanel>
                 </Border>
 
