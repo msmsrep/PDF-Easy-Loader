@@ -7,7 +7,7 @@ namespace PDF_Easy_Loader.Views;
 public partial class MainWindow : Window
 {
     /// <summary>結果が無い間の大きさ。ヘッダーの操作列が収まれば足りる</summary>
-    private const double CompactWidth = 560;
+    private const double CompactWidth = 640;
     private const double CompactHeight = 130;
 
     /// <summary>結果を表示するときの大きさ</summary>

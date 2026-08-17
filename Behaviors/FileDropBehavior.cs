@@ -1,11 +1,14 @@
 using System.Windows;
 using System.Windows.Input;
+using PDF_Easy_Loader.Services;
 
 namespace PDF_Easy_Loader.Behaviors;
 
 /// <summary>
-/// ドラッグ＆ドロップされたファイルのパス一覧をコマンドへ渡す添付ビヘイビア。
+/// ドラッグ＆ドロップされたデータをコマンドへ渡す添付ビヘイビア。
 /// コードビハインドにロジックを置かないために使う。
+/// Outlookの添付のようにパスを持たないデータもあるため、
+/// パスへの変換はコマンド側（AttachmentExtractor）に任せる。
 /// </summary>
 public static class FileDropBehavior
 {
@@ -38,7 +41,7 @@ public static class FileDropBehavior
 
     private static void OnDragOver(object sender, DragEventArgs e)
     {
-        e.Effects = e.Data.GetDataPresent(DataFormats.FileDrop)
+        e.Effects = AttachmentExtractor.HasFiles(e.Data)
             ? DragDropEffects.Copy
             : DragDropEffects.None;
 
@@ -49,13 +52,13 @@ public static class FileDropBehavior
     {
         if (sender is not DependencyObject element) return;
 
-        if (e.Data.GetData(DataFormats.FileDrop) is not string[] paths) return;
-
         var command = GetCommand(element);
 
-        if (command?.CanExecute(paths) == true)
+        // ドロップ元が持つデータは、この場を離れると無効になることがある。
+        // 取り出しはコマンドの同期部分で済ませる
+        if (command?.CanExecute(e.Data) == true)
         {
-            command.Execute(paths);
+            command.Execute(e.Data);
         }
 
         e.Handled = true;

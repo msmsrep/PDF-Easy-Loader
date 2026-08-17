@@ -55,6 +55,7 @@ public partial class App : Application
         services.AddSingleton<IClipboardService, ClipboardService>();
         services.AddSingleton<IDialogService, DialogService>();
         services.AddSingleton<IPdfLoader, PdfLoader>();
+        services.AddSingleton<IAttachmentExtractor, AttachmentExtractor>();
 
         services.AddSingleton<MainViewModel>();
         services.AddSingleton<MainWindow>();

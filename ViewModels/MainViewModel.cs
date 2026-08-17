@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PDF_Easy_Loader.Services;
@@ -13,9 +14,12 @@ public sealed partial class MainViewModel(
     IPdfLoader loader,
     IClipboardService clipboard,
     IDialogService dialogs,
-    IAppSettingsStore settingsStore) : ObservableObject
+    IAppSettingsStore settingsStore,
+    IAttachmentExtractor attachments) : ObservableObject
 {
     private const string PdfExtension = ".pdf";
+
+    private const string ReadyMessage = "PDFをドラッグ＆ドロップ、貼り付け（Ctrl+V）、またはファイルを選択してください";
 
     /// <summary>新しい結果が上に来るように先頭へ挿入する</summary>
     public ObservableCollection<PdfResultViewModel> Results { get; } = [];
@@ -24,7 +28,7 @@ public sealed partial class MainViewModel(
     public partial bool IsBusy { get; private set; }
 
     [ObservableProperty]
-    public partial string StatusMessage { get; private set; } = "PDFをドラッグ＆ドロップするか、ファイルを選択してください";
+    public partial string StatusMessage { get; private set; } = ReadyMessage;
 
     public bool HasResults => Results.Count > 0;
 
@@ -44,7 +48,45 @@ public sealed partial class MainViewModel(
     }
 
     /// <summary>
-    /// ドロップされたファイル、または起動引数で渡されたファイルを処理する
+    /// ドロップされたデータを処理する。
+    /// Outlookの添付はパスを持たないため、いったんファイルへ取り出してから読み込む。
+    /// </summary>
+    [RelayCommand(AllowConcurrentExecutions = false)]
+    private async Task DropAsync(IDataObject? data)
+    {
+        if (data is null) return;
+
+        var paths = attachments.Extract(data);
+
+        if (paths.Count == 0)
+        {
+            StatusMessage = "ファイルを取り出せませんでした";
+            return;
+        }
+
+        await LoadFilesAsync(paths);
+    }
+
+    /// <summary>
+    /// クリップボードの内容を処理する。
+    /// Outlookの添付はドラッグ＆ドロップできない場面があるため、コピー＆貼り付けでも受け付ける。
+    /// </summary>
+    [RelayCommand(AllowConcurrentExecutions = false)]
+    private async Task PasteAsync()
+    {
+        var paths = attachments.ExtractFromClipboard();
+
+        if (paths.Count == 0)
+        {
+            StatusMessage = "クリップボードにファイルがありません";
+            return;
+        }
+
+        await LoadFilesAsync(paths);
+    }
+
+    /// <summary>
+    /// ファイル選択や起動引数で渡されたファイルを処理する
     /// </summary>
     [RelayCommand(AllowConcurrentExecutions = false)]
     private async Task LoadFilesAsync(IReadOnlyList<string>? paths)
@@ -108,6 +150,6 @@ public sealed partial class MainViewModel(
     {
         Results.Clear();
         OnPropertyChanged(nameof(HasResults));
-        StatusMessage = "PDFをドラッグ＆ドロップするか、ファイルを選択してください";
+        StatusMessage = ReadyMessage;
     }
 }
