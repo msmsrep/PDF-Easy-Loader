@@ -52,7 +52,15 @@ public sealed class PdfPageLayout
     public static PdfPageLayout Read(PdfPage page)
     {
         var collector = new LineCollector();
-        new PdfCanvasProcessor(collector).ProcessPageContent(page);
+
+        try
+        {
+            new TolerantCanvasProcessor(collector).ProcessPageContent(page);
+        }
+        catch (Exception)
+        {
+            // ページ単位の失敗で他のページごと落とさない。ここまでに拾えた分を使う
+        }
 
         var lines = collector.BuildLines();
 
@@ -218,6 +226,29 @@ public sealed class PdfPageLayout
         gaps.Sort();
 
         return gaps[gaps.Count / 2];
+    }
+
+    /// <summary>
+    /// 演算子1個ごとの失敗を握りつぶすプロセッサ。
+    ///
+    /// フォントの ToUnicode が壊れたPDFでは、iTextが文字幅を測る途中で
+    /// 不正なコードポイントに当たって例外を投げることがある。
+    /// 既定のプロセッサはそこでページの解析ごと止まってしまうため、
+    /// 問題のある描画命令だけを飛ばして残りを読み続ける。
+    /// </summary>
+    private sealed class TolerantCanvasProcessor(IEventListener listener) : PdfCanvasProcessor(listener)
+    {
+        protected override void InvokeOperator(PdfLiteral op, IList<PdfObject> operands)
+        {
+            try
+            {
+                base.InvokeOperator(op, operands);
+            }
+            catch (Exception)
+            {
+                // この命令の描画は諦めて次へ進む
+            }
+        }
     }
 
     /// <summary>
